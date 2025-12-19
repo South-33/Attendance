@@ -170,12 +170,12 @@ Found:     HLHHLH as subsequence → 6/6 match ✅
 
 | Config | Pass Rate | Avg Score | Notes |
 |--------|-----------|-----------|-------|
-| 100% | 100% (5/5) | 6.0/6 | Perfect |
-| 75% | 100% (5/5) | 6.0/6 | Perfect |
-| 50% | 100% (10/10) | 6.0/6 | **Recommended** ✅ |
+| 100% | 100% (10/10) | 6.0/6 | Perfect |
+| 75% | 100% (10/10) | 6.0/6 | **Recommended** ✅ |
+| 50% | 100% (10/10) | 6.0/6 | Perfect |
 | 25% | 90% (9/10) | 5.8/6 | Edge of reliable range |
 
-**Recommendation:** Use **50% volume** with output filter - best balance of accuracy and battery/speaker life.
+**Recommendation:** Use **75% volume** with output filter - best balance of accuracy and battery/speaker life.
 
 ---
 
