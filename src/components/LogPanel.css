@@ -1,0 +1,156 @@
+/* FAT FIREWORK - Log Panel */
+.log-panel {
+  background: #222;
+  border-radius: 0;
+  border: 4px solid var(--ff-text);
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--ff-text);
+  color: white;
+  border-bottom: 2px solid #000;
+  cursor: pointer;
+}
+
+.log-header h3 {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: white;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.log-btn {
+  padding: 4px 8px;
+  border-radius: 0;
+  border: 1px solid #fff;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  transition: all 0.1s;
+  text-transform: uppercase;
+}
+
+.log-btn.copy {
+  background: #fff;
+  color: var(--ff-text);
+}
+
+.log-btn.copy:hover {
+  background: var(--ff-red);
+  color: white;
+  border-color: var(--ff-red);
+}
+
+.log-btn.clear {
+  background: transparent;
+  color: #ccc;
+  border-color: #ccc;
+}
+
+.log-btn.clear:hover {
+  color: white;
+  border-color: white;
+}
+
+/* Content container with horizontal padding to avoid text touching scrollbar */
+.log-content {
+  overflow-y: scroll;
+  padding: 8px 12px;
+  background: #222;
+  color: #f8f9fa;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s;
+}
+
+.log-panel.collapsed .log-content {
+  max-height: 0 !important;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+/* Scrollbar styling */
+/* Scrollbar styling */
+.log-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.log-content::-webkit-scrollbar-track {
+  background: #111;
+}
+
+.log-content::-webkit-scrollbar-thumb {
+  background: var(--ff-red);
+  border: 1px solid #000;
+}
+
+.log-content::-webkit-scrollbar-thumb:hover {
+  background: white;
+}
+
+.log-entry {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  line-height: 1.4;
+  word-break: break-word;
+  border-bottom: 1px dashed #333;
+}
+
+.log-time {
+  color: #888;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.log-message {
+  flex: 1;
+}
+
+.log-empty {
+  color: #666;
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  border-bottom: 1px dashed #333;
+}
+
+@media (max-width: 600px) {
+  .log-panel {
+    font-size: 10px;
+    border-width: 2px;
+  }
+
+  .log-header {
+    padding: 6px 10px;
+  }
+
+  .log-entry {
+    gap: 4px;
+    padding: 2px 0;
+  }
+
+  .log-time {
+    font-size: 9px;
+  }
+
+  .log-btn {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+}

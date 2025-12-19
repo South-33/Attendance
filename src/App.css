@@ -1,0 +1,500 @@
+/* FAT FIREWORK BRUTALIST THEME */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-mono);
+  background-color: var(--ff-bg);
+  color: var(--ff-text);
+  overflow-x: hidden;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  position: relative;
+}
+
+/* DECORATIVE BACKGROUND ELEMENTS */
+.app-container::before {
+  content: "Attendace";
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  font-family: var(--font-display);
+  color: var(--ff-red);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  opacity: 0.8;
+}
+
+.app-container::after {
+  content: "Ultrasonic Proximity Verification System";
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-family: var(--font-display);
+  color: var(--ff-red);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-align: right;
+  letter-spacing: 1px;
+}
+
+/* GENERIC CARD STYLE - REPLACES GLASSMORPHISM */
+.register-card,
+.role-card {
+  background: var(--ff-bg);
+  border: 2px solid var(--ff-red);
+  border-radius: 0;
+  padding: 40px;
+  text-align: left;
+  /* Brutalist prefers lists/left align usually, but center works if bold */
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+/* Technical Corner Markers */
+.register-card::after,
+.role-card::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 12px;
+  height: 12px;
+  background: var(--ff-red);
+  box-shadow:
+    calc(100% + 4px) 0 0 var(--ff-red),
+    /* Extend markers to corners? No, let's keep it simple top-left */
+    0 0 0 0 transparent;
+}
+
+.register-card::before,
+.role-card::before {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 12px;
+  height: 12px;
+  background: var(--ff-red);
+}
+
+.register-card h1,
+.role-card h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: var(--ff-red);
+  /* No gradient text, solid high contrast */
+  text-transform: uppercase;
+  line-height: 0.9;
+  border-bottom: 4px solid var(--ff-text);
+  padding-bottom: 10px;
+  display: inline-block;
+  width: 100%;
+}
+
+.register-card p,
+.role-card>p {
+  color: var(--ff-text);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  margin-bottom: 30px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+/* FORM ELEMENTS */
+.register-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.register-card input {
+  padding: 16px;
+  font-size: 1rem;
+  font-family: var(--font-mono);
+  border: 1px solid var(--ff-text);
+  border-radius: 0;
+  background: #fff;
+  color: var(--ff-text);
+  transition: all 0.2s;
+}
+
+.register-card input:focus {
+  outline: none;
+  border-color: var(--ff-red);
+  background: #fff0f0;
+  box-shadow: 4px 4px 0 rgba(255, 42, 42, 0.2);
+}
+
+.register-card button {
+  padding: 18px;
+  margin-top: 10px;
+  background: var(--ff-text);
+  /* Black button */
+  color: white;
+  border: none;
+  font-size: 1.1rem;
+}
+
+.register-card button:hover:not(:disabled) {
+  background: var(--ff-red);
+  color: white;
+  transform: translate(-4px, -4px);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.3);
+}
+
+.register-card button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #555;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ROLE SELECTION */
+.role-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.role-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  background: white;
+  color: var(--ff-text);
+  border: 1px solid var(--ff-text);
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.1s;
+  position: relative;
+}
+
+.role-btn span {
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  color: #666;
+  text-transform: none;
+  /* Keep description mixed case or standard? let's standard mono */
+}
+
+/* Specific Role Styles */
+.role-btn.teacher {
+  border-left: 8px solid var(--ff-text);
+}
+
+.role-btn.teacher:hover {
+  background: var(--ff-text);
+  color: white;
+  transform: translateX(5px);
+  border-left: 8px solid var(--ff-red);
+}
+
+.role-btn.teacher:hover span {
+  color: #ccc;
+}
+
+.role-btn.student {
+  border-left: 8px solid var(--ff-red);
+}
+
+.role-btn.student:hover {
+  background: var(--ff-red);
+  color: white;
+  transform: translateX(5px);
+  border-left: 8px solid var(--ff-text);
+}
+
+.role-btn.student:hover span {
+  color: white;
+}
+
+/* Change Name Link */
+.change-name {
+  background: none;
+  border: none;
+  color: var(--ff-text);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--ff-text);
+  padding: 0;
+  margin-top: 10px;
+  opacity: 0.6;
+}
+
+.change-name:hover {
+  opacity: 1;
+  color: white;
+  /* Changed from var(--ff-red) to be readable on red bg */
+  border-color: white;
+}
+
+/* HOW IT WORKS SECTION */
+.how-it-works {
+  margin-top: 80px;
+  text-align: center;
+  max-width: 1000px;
+  width: 100%;
+}
+
+.how-it-works h3 {
+  font-size: 1.2rem;
+  color: var(--ff-text);
+  margin-bottom: 40px;
+  background: var(--ff-text);
+  color: white;
+  display: inline-block;
+  padding: 10px 20px;
+  transform: skew(-10deg);
+  /* Slight industrial skew */
+}
+
+/* Steps Grid */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  text-align: left;
+}
+
+.step-item {
+  background: white;
+  border: 1px solid var(--ff-text);
+  padding: 0;
+  border-radius: 0;
+  position: relative;
+  transition: all 0.2s;
+  height: 380px;
+  /* FIXED HEIGHT TO PREVENT SHIFT */
+  overflow: hidden;
+  /* Contains the slide-up */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-item:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 8px 8px 0 var(--ff-grid);
+  border-color: var(--ff-red);
+}
+
+/* Step Header Area (Icon + Title) */
+.step-icon {
+  font-size: 1.5rem;
+  background: var(--ff-bg);
+  border-bottom: 1px solid var(--ff-text);
+  padding: 15px;
+  font-family: var(--font-display);
+  font-weight: bold;
+  color: var(--ff-red);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border-radius: 0;
+  height: auto;
+  margin: 0;
+}
+
+.step-banner {
+  font-size: 0.9rem;
+  font-family: var(--font-display);
+  color: var(--ff-text);
+  background: white;
+  padding: 2px 8px;
+  border: 1px solid var(--ff-text);
+  margin-left: auto;
+  letter-spacing: 2px;
+  font-weight: 800;
+}
+
+/* Just use numbers or keep emoji? Emoji might clash with brutalist. 
+   Let's wrap emoji in a 'raw' container or replace with index numbers if we could, 
+   but strictly CSS, we keep the content. */
+
+.step-item strong {
+  display: block;
+  padding: 20px 20px 10px 20px;
+  font-size: 1.1rem;
+  font-family: var(--font-display);
+  color: var(--ff-text);
+  text-transform: uppercase;
+}
+
+.step-item p {
+  padding: 0 20px 20px 20px;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Expandable details - NOW SLIDE UP OVERLAY */
+.step-details {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  /* Cover full card or just most of it? Full cover is cleaner */
+  background: var(--ff-text);
+  /* Dark background for contrast */
+  color: white;
+  transform: translateY(100%);
+  /* Hidden initially */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 40px 30px 80px 30px;
+  /* Reduced top, added bottom buffer for hint */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  /* Switch to start for precise placement */
+  z-index: 10;
+  border-top: 4px solid var(--ff-red);
+}
+
+.step-item.expanded .step-details {
+  transform: translateY(0);
+  /* Slide up */
+  max-height: none;
+  opacity: 1;
+  margin-top: 0;
+}
+
+.step-details p {
+  padding: 0;
+  font-size: 0.95rem;
+  font-family: var(--font-mono);
+  color: #ccc;
+  background: transparent;
+  border: none;
+  line-height: 1.6;
+}
+
+.step-details .step-rule {
+  display: block;
+  height: 2px;
+  background: var(--ff-red);
+  width: 50px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+/* Hint Text */
+.expand-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 15px;
+  text-align: center;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--ff-red);
+  background: white;
+  border-top: 1px dashed #ccc;
+  font-weight: 700;
+  transition: all 0.2s;
+  z-index: 5;
+}
+
+.step-item:hover .expand-hint {
+  background: var(--ff-bg);
+  letter-spacing: 2px;
+}
+
+/* When expanded, change hint to Close */
+.step-item.expanded .expand-hint {
+  background: var(--ff-text);
+  color: var(--ff-red);
+  border-top: 1px solid #333;
+  z-index: 20;
+  /* Above details */
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .app-container {
+    padding: 60px 15px 20px 15px;
+  }
+
+  .app-container::before,
+  .app-container::after {
+    font-size: 0.6rem;
+    top: 15px;
+    opacity: 0.5;
+  }
+
+  .app-container::before {
+    left: 15px;
+  }
+
+  .app-container::after {
+    right: 15px;
+  }
+
+  .register-card,
+  .role-card {
+    padding: 25px 20px;
+  }
+
+  .register-card h1,
+  .role-card h1 {
+    font-size: 1.8rem;
+  }
+
+  .role-btn {
+    font-size: 1.1rem;
+    padding: 15px;
+  }
+
+  .role-btn span {
+    font-size: 0.7rem;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .step-item {
+    height: auto;
+    min-height: 350px;
+  }
+
+  .step-icon {
+    font-size: 1.2rem;
+    padding: 10px 15px;
+  }
+}
