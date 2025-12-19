@@ -22,13 +22,13 @@ import { log } from '../utils/logger';
 import type { PulseType, EmitterConfig } from '../audio/audioEngine';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDx2IAyXRd96pmgzFPFKHRsesS_WCNa9Cw",
-    authDomain: "attendance2-e7f1b.firebaseapp.com",
-    projectId: "attendance2-e7f1b",
-    storageBucket: "attendance2-e7f1b.firebasestorage.app",
-    messagingSenderId: "53837370256",
-    appId: "1:53837370256:web:456df0f0f781497a7f5915",
-    measurementId: "G-5L66WYGM7R"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);

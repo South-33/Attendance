@@ -1,10 +1,10 @@
 # Attendance - Ultrasonic Proximity Verification
-> **Status:** ✅ Finalized "Fat Firework" Industrial Design
+> **Status:** ✅ Functional Proof of Concept (Showcase)
 > **Theme:** 🧨 **Firework Brutalist** (Red / Industrial Silver / Deep Black)
 
 ## 🎯 Project Overview
 
-A high-fidelity web application built for verifyable attendance through ultrasonic proximity detection. The system leverages inaudible high-frequency audio signatures to ensure physical presence without the need for GPS or specialized hardware.
+A high-fidelity proof-of-concept for attendance verification through ultrasonic proximity detection. This application serves as a technical showcase for using inaudible high-frequency audio signatures to verify physical presence.
 
 ### Design Philosophy
 - **Firework Brutalist**: High-contrast industrial aesthetic using sharp square elements, thick borders, and a stark Red/Silver palette.
@@ -222,4 +222,5 @@ firebase deploy --only firestore # Deploy rules
 - [x] **Teacher Presence System** (Heartbeat + Cleanup)
 - [x] **Response Timeout** (30s safety auto-fail & user cancel)
 - [x] **Brick-Wall Output Filter** (48dB/oct @ 16.5kHz)
+- [x] **Production Security Rules** (Firestore Schema Validation)
 - [x] Cross-device testing verified (iOS / Android / Laptop)
