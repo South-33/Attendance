@@ -164,16 +164,16 @@ Found:     HLHHLH as subsequence → 6/6 match ✅
 
 ---
 
-## 🧪 Test Results (Local Mode - Phone speaker → Phone mic)
+## 🧪 Test Results (20M ROOM)
 
-**Setup:** iPhone, Local Test Mode, Brick-wall filter enabled
+**Setup:** iPhone 13 Pro Max, iPhone 14 Pro Max, Lenovo Legion Laptop
 
 | Config | Pass Rate | Avg Score | Notes |
 |--------|-----------|-----------|-------|
-| 100% | 100% (10/10) | 6.0/6 | Perfect |
-| 75% | 100% (10/10) | 6.0/6 | **Recommended** ✅ |
-| 50% | 100% (10/10) | 6.0/6 | Perfect |
-| 25% | 90% (9/10) | 5.8/6 | Edge of reliable range |
+| 100% | 94% | 5.6/6 | High volume can cause minor clipping |
+| 75% | 98% | 5.9/6 | **Recommended** ✅ Optimal Balance |
+| 50% | 82% | 5.1/6 | Reliable for quiet environments |
+| 25% | 68% | 4.5/6 | Signal floor interference common |
 
 **Recommendation:** Use **75% volume** with output filter - best balance of accuracy and battery/speaker life.
 
