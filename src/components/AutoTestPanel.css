@@ -98,8 +98,12 @@
     border-radius: 0;
     cursor: pointer;
     transition: all 0.1s;
-    min-width: 80px;
+    transition: all 0.1s;
+    min-width: 70px;
+    flex: 1 1 auto;
     user-select: none;
+    text-align: center;
+    overflow: hidden;
 }
 
 .volume-checkbox:hover {
@@ -129,9 +133,10 @@
 .volume-checkbox span {
     color: var(--ff-text);
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: color 0.1s;
     font-family: var(--font-mono);
+    white-space: nowrap;
 }
 
 .volume-checkbox:has(input:checked) span {
@@ -140,44 +145,55 @@
 }
 
 .volume-checkbox span.muted {
-    font-style: normal;
+    font-size: 0.75rem;
+    white-space: normal;
+    line-height: 1.1;
 }
 
 /* Local Mode Toggle */
 .local-mode-toggle {
-    margin: 16px 0;
-    padding: 12px 16px;
+    margin: 12px 0;
+    padding: 16px;
     background: white;
     border: 1px solid var(--ff-text);
     border-radius: 0;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
 .local-checkbox {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     cursor: pointer;
     user-select: none;
 }
 
 .local-checkbox input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     accent-color: var(--ff-red);
     cursor: pointer;
     border-radius: 0;
+    grid-row: span 2;
 }
 
 .local-checkbox span {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--ff-text);
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    line-height: 1.2;
 }
 
 .local-checkbox small {
     color: #666;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-family: var(--font-mono);
+    opacity: 0.8;
 }
 
 .tests-per-config {
@@ -640,8 +656,27 @@
     }
 
     .volume-checkbox {
-        flex: 1;
+        flex: 1 1 calc(33% - 12px);
         min-width: 60px;
+        padding: 10px 8px;
+    }
+
+    .volume-checkbox span {
+        font-size: 0.8rem;
+    }
+
+    .local-checkbox {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .volume-checkbox {
+        flex: 1 1 calc(50% - 12px);
+    }
+
+    .autotest-panel {
+        padding: 16px;
     }
 }
 

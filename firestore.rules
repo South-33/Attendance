@@ -4,8 +4,8 @@ service cloud.firestore {
     
     // Sessions: Creation and discovery
     match /sessions/{sessionId} {
-      // Allow finding sessions by code (used in StudentView)
-      allow read: if resource == null || resource.data.active == true;
+      // Allow finding sessions (used in Teacher/Student lists)
+      allow read: if true;
       
       // Allow creation with valid schema
       allow create: if request.resource.data.keys().hasAll(['teacherId', 'passcode', 'active', 'createdAt']);
@@ -13,8 +13,8 @@ service cloud.firestore {
       // Allow updates only if the teacherId matches (pseudo-auth)
       allow update: if request.resource.data.teacherId == resource.data.teacherId;
       
-      // Prevent deletion for audit trail (deactivation only)
-      allow delete: if false;
+      // Allow deletion for cleanup
+      allow delete: if true;
     }
 
     // Queue: Real-time interactions

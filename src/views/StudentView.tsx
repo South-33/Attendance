@@ -38,7 +38,7 @@ interface StudentViewProps {
 }
 
 const DEFAULT_CONFIG: EmitterConfig = {
-    volume: 0.75,
+    volume: 0.8,  // Lower to prevent speaker clipping (causes audible harmonics)
     freqLow: AUDIO_CONFIG.FREQ_LOW,
     freqHigh: AUDIO_CONFIG.FREQ_HIGH,
     pulseDuration: AUDIO_CONFIG.PULSE_DURATION_MS,

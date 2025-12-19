@@ -91,13 +91,13 @@ Each test captures detailed signal metrics:
 ```
 1. Generate random pattern: ['H', 'L', 'H', 'H', 'L', 'H'] (6 pulses)
 2. For each pulse:
-   - H = 19000Hz, L = 17500Hz (sine wave)
+   - H = 20000Hz, L = 18500Hz (sine wave)
    - Fade envelope (2ms in, 8ms out) prevents pops
    - Duration: 80ms per pulse
    - Gap: 50ms between pulses
-3. Output Filter: Quad 16.5kHz highpass (48dB/oct brick-wall)
-   - Blocks audible transients/pops below 16.5kHz
-   - 1kHz headroom below 17.5kHz signal = no attenuation
+3. Output Filter: Quad 17.5kHz highpass (48dB/oct brick-wall)
+   - Blocks audible transients/pops below 17.5kHz
+   - 1kHz headroom below 18.5kHz signal = no attenuation
 4. Total emission: ~780ms
 ```
 
@@ -120,7 +120,7 @@ Mic → Highpass(17kHz) → Lowpass(20kHz) → Gain(60x) → Limiter → FFT(819
 4. Every frame (~16ms):
    - FFT analysis (8192 bins → ~5.9Hz resolution)
    - SNR check: must be 2x above noise floor
-   - Frequency validation: H = 19000±100Hz, L = 17500±100Hz
+   - Frequency validation: H = 20000±120Hz, L = 18500±120Hz
    - Peak merge: within 400Hz AND 50ms → same peak
 5. On submit: cap at 10 strongest, sort by time, return pattern
 ```
@@ -151,9 +151,9 @@ Found:     HLHHLH as subsequence → 6/6 match ✅
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| `FREQ_HIGH` | 19000 Hz | "H" pulse |
-| `FREQ_LOW` | 17500 Hz | "L" pulse |
-| `FREQ_TOLERANCE` | ±100 Hz | Valid detection range (tightened) |
+| `FREQ_HIGH` | 20000 Hz | "H" pulse |
+| `FREQ_LOW` | 18500 Hz | "L" pulse |
+| `FREQ_TOLERANCE` | ±120 Hz | Valid detection range |
 | `PULSE_DURATION_MS` | 80 ms | Each pulse length |
 | `PULSE_GAP_MS` | 50 ms | Silence between pulses |
 | `PEAK_MERGE_TIME_MS` | 50 ms | Merge window (< gap) |
@@ -161,22 +161,6 @@ Found:     HLHHLH as subsequence → 6/6 match ✅
 | `MIC_GAIN` | 60x | Amplification |
 | `FFT_SIZE` | 8192 | Frequency resolution |
 | `SNR_THRESHOLD` | 2x | Signal must be 2x noise |
-
----
-
-## 🧪 Test Results (10M X 15M CLASSROOM)
-
-**Setup:** iPhone 13 Pro Max, iPhone 14 Pro Max, Lenovo Legion Laptop.
-**Disclaimer:** Results may vary due to the acoustics of the classroom.
-
-| Config | Pass Rate | Avg Score | Notes |
-|--------|-----------|-----------|-------|
-| 100% | 94% | 5.4/6 | High volume can cause minor clipping |
-| 75% | 98% | 5.6/6 | **Recommended** ✅ Optimal Balance |
-| 50% | 82% | 5.2/6 | Reliable for quiet environments |
-| 25% | 68% | 4.2/6 | Signal floor interference common |
-
-**Recommendation:** Use **75% volume** with output filter - best balance of accuracy and battery/speaker life.
 
 ---
 
@@ -221,6 +205,6 @@ firebase deploy --only firestore # Deploy rules
 - [x] **Auto-Test Panel** with diagnostics
 - [x] **Teacher Presence System** (Heartbeat + Cleanup)
 - [x] **Response Timeout** (30s safety auto-fail & user cancel)
-- [x] **Brick-Wall Output Filter** (48dB/oct @ 16.5kHz)
+- [x] **Brick-Wall Output Filter** (48dB/oct @ 17.5kHz)
 - [x] **Production Security Rules** (Firestore Schema Validation)
 - [x] Cross-device testing verified (iOS / Android / Laptop)

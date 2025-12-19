@@ -266,6 +266,10 @@ export function TeacherView({ teacherId, teacherName, onBack }: TeacherViewProps
             // Emit the pattern
             await emitterRef.current?.emit(pattern, config);
 
+            // Small delay for Bluetooth audio latency (100-300ms typical)
+            // Ensures the last pulse is fully transmitted before asking students to submit
+            await new Promise(r => setTimeout(r, 150));
+
             // Signal students to submit
             for (const student of students) {
                 await updateQueueStatus(student.id, 'submitted');

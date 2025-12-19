@@ -5,10 +5,10 @@ import { log } from '../utils/logger';
 
 // ============== CONFIGURATION ==============
 export const AUDIO_CONFIG = {
-    FREQ_LOW: 17500,           // 17.5 kHz
-    FREQ_HIGH: 19000,          // 19.0 kHz
-    FREQ_THRESHOLD: 18250,     // Classification boundary
-    FREQ_TOLERANCE: 100,       // ±100Hz tolerance for valid detection (tightened for security)
+    FREQ_LOW: 18500,           // 18.5 kHz
+    FREQ_HIGH: 20000,          // 20.0 kHz
+    FREQ_THRESHOLD: 19250,     // Classification boundary
+    FREQ_TOLERANCE: 120,       // Detection tolerance
     PULSE_DURATION_MS: 80,     // Default pulse duration
     PULSE_GAP_MS: 50,          // Gap between pulses
     NUM_PULSES: 6,
@@ -16,8 +16,8 @@ export const AUDIO_CONFIG = {
 
     // Listener config
     MIC_GAIN: 60,              // 60x amplification (increased from 30x)
-    BANDPASS_LOW: 17000,       // Hz
-    BANDPASS_HIGH: 20000,      // Hz
+    BANDPASS_LOW: 18000,       // Hz
+    BANDPASS_HIGH: 21000,      // Hz
     FFT_SIZE: 8192,            // Higher = better freq resolution
     SNR_THRESHOLD: 2,          // Signal must be 2x noise floor (very lenient)
     PEAK_MERGE_FREQ_HZ: 400,   // Merge peaks within 400Hz
@@ -60,8 +60,8 @@ export class UltrasonicEmitter {
 
             // Create cascaded highpass filters for STEEP rolloff (48dB/octave = brick wall)
             // 4 filters in series = extremely sharp cutoff
-            // 16.5kHz cutoff = 1kHz headroom below our 17.5kHz signal
-            const FILTER_CUTOFF = 16500; // 16.5kHz
+            // 17.5kHz cutoff = 1kHz headroom below our 18.5kHz signal
+            const FILTER_CUTOFF = 17500; // 17.5kHz
             const FILTER_Q = 0.707; // Butterworth (no resonance)
 
             const filters: BiquadFilterNode[] = [];
@@ -162,8 +162,10 @@ export class UltrasonicEmitter {
         // Route through filter (reduces pops) or directly to destination (for A/B testing)
         if (useFilter && this.outputFilter) {
             gainNode.connect(this.outputFilter);
+            log.debug(`[Emitter] Pulse ${freq}Hz routed through highpass filter`);
         } else {
             gainNode.connect(ctx.destination);
+            log.debug(`[Emitter] Pulse ${freq}Hz going DIRECT (no filter!) - useFilter=${useFilter}, hasFilter=${!!this.outputFilter}`);
         }
 
         oscillator.start(startTime);
