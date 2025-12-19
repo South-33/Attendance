@@ -166,8 +166,8 @@ Found:     HLHHLH as subsequence → 6/6 match ✅
 
 ## 🧪 Test Results (10M X 15M CLASSROOM)
 
-**Setup:** iPhone 13 Pro Max, iPhone 14 Pro Max, Lenovo Legion Laptop
-Results may vary due to the acoustics of the classroom.
+**Setup:** iPhone 13 Pro Max, iPhone 14 Pro Max, Lenovo Legion Laptop.
+**Disclaimer:** Results may vary due to the acoustics of the classroom.
 
 | Config | Pass Rate | Avg Score | Notes |
 |--------|-----------|-----------|-------|
