@@ -164,7 +164,7 @@ Found:     HLHHLH as subsequence → 6/6 match ✅
 
 ---
 
-## 🧪 Test Results (20M ROOM)
+## 🧪 Test Results (15M CLASSROOM)
 
 **Setup:** iPhone 13 Pro Max, iPhone 14 Pro Max, Lenovo Legion Laptop
 
