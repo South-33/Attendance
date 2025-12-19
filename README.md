@@ -1,11 +1,15 @@
-# AttendanceV2 - Ultrasonic Proximity Verification
-
-> **Last Updated:** 2025-12-11 01:01 ICT
-> **Status:** ✅ Production-ready with brick-wall output filter
+# Attendance - Ultrasonic Proximity Verification
+> **Status:** ✅ Finalized "Fat Firework" Industrial Design
+> **Theme:** 🧨 **Firework Brutalist** (Red / Industrial Silver / Deep Black)
 
 ## 🎯 Project Overview
 
-A web app for attendance verification using ultrasonic (high-frequency) audio pulses. Teachers emit 6-pulse H/L (High/Low frequency) patterns, students detect them via microphone, and the system verifies proximity by finding the emitted pattern as a **subsequence** in the detected peaks.
+A high-fidelity web application built for verifyable attendance through ultrasonic proximity detection. The system leverages inaudible high-frequency audio signatures to ensure physical presence without the need for GPS or specialized hardware.
+
+### Design Philosophy
+- **Firework Brutalist**: High-contrast industrial aesthetic using sharp square elements, thick borders, and a stark Red/Silver palette.
+- **Stable Dashboards**: Optimized for minimal layout shift using `scrollbar-gutter: stable` and session initialization placeholders.
+- **Snappy Transitions**: Custom `view-animate` system for mechanical, high-performance screen entry.
 
 ### Core Concept
 - **Teacher**: Emits random 6-pulse pattern (e.g., `HLHHLH`)
@@ -21,11 +25,16 @@ A web app for attendance verification using ultrasonic (high-frequency) audio pu
 
 ## 🆕 Recent Features
 
-### Passcode Room System 🆕
-- **Security**: Closed session looping (no public list of classes)
-- **Teacher**: Generates unique **6-digit room code** (e.g. `928401`)
-- **Student**: Enters code to find and join specific session
-- **Flow**: Teacher Starts -> Gets Code -> Student Enters Code -> Join
+### Passcode Room System
+- **Security**: Closed session looping (no public list of classes).
+- **Teacher**: Generates unique **6-digit room code** (e.g. `384617`).
+- **Student**: Enters code to find and join specific session.
+- **Copy Feedback**: One-tap copying with "COPIED!" visual confirmation and snappier button physics.
+
+### Real-time Roster Visibility
+- **Instant Connect**: Students appear in the teacher's roster as soon as they join a room code, marked as 'waiting'.
+- **Live Status**: Real-time feedback in the roster as students move through 'ready' → 'listening' → 'verified'.
+- **Automatic Cleanup**: Students are automatically removed from the roster if they leave the page or close their tab.
 
 ### Teacher Session Presence System
 - **Heartbeat**: Teacher sends `lastActive` timestamp every 5 seconds
@@ -201,21 +210,15 @@ firebase deploy --only firestore # Deploy rules
 
 ---
 
-## ✅ Implementation Status
-
-- [x] Audio engine (Emitter + Listener)
+- [x] **Fat Firework Brutalist UI** (Modern Industrial Aesthetic)
 - [x] **Passcode Room System** (Join by 6-digit code)
-- [x] Subsequence pattern matching
-- [x] Frequency validation (±100Hz)
-- [x] Peak merging (50ms window)
-- [x] Security cap (MAX_PEAKS=10)
-- [x] Pre-emission noise clearing
+- [x] **Immediate Roster Join** (Global presence tracking)
+- [x] **Custom Brutalist Scrollbars** (Theme-locked UI)
+- [x] **View Entry Animations** (Snap-up mechanical transitions)
+- [x] **Subsequence Pattern Matching** (Audio Verification)
+- [x] **FFT Analysis** (~5.9Hz frequency resolution)
 - [x] **Auto-Test Panel** with diagnostics
-- [x] **Local Test Mode** (no teacher needed)
-- [x] **Teacher Presence System** (heartbeat + stale detection)
-- [x] **Response Timeout** (5s auto-retry)
-- [x] **Diagnostic Data** (dB, SNR, noise floor)
+- [x] **Teacher Presence System** (Heartbeat + Cleanup)
+- [x] **Response Timeout** (30s safety auto-fail & user cancel)
 - [x] **Brick-Wall Output Filter** (48dB/oct @ 16.5kHz)
-- [x] **Queue Race Condition Fix** (re-check after processing)
-- [x] Cross-device testing verified
-- [ ] Production security rules
+- [x] Cross-device testing verified (iOS / Android / Laptop)
