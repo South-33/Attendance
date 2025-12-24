@@ -66,7 +66,7 @@ body {
   padding: 40px;
   text-align: left;
   /* Brutalist prefers lists/left align usually, but center works if bold */
-  max-width: 500px;
+  max-width: 560px;
   width: 100%;
   position: relative;
   box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.1);
@@ -183,8 +183,9 @@ body {
 
 .role-btn {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 20px;
   padding: 20px 24px;
   font-size: 1.5rem;
   font-weight: 700;
@@ -199,12 +200,14 @@ body {
   position: relative;
 }
 
-.role-btn span {
+.role-desc {
+  margin-left: auto;
   font-size: 0.8rem;
   font-family: var(--font-mono);
   font-weight: 400;
   color: #666;
   text-transform: none;
+  white-space: nowrap;
   /* Keep description mixed case or standard? let's standard mono */
 }
 
@@ -220,7 +223,7 @@ body {
   border-left: 8px solid var(--ff-red);
 }
 
-.role-btn.teacher:hover span {
+.role-btn.teacher:hover .role-desc {
   color: #ccc;
 }
 
@@ -235,7 +238,7 @@ body {
   border-left: 8px solid var(--ff-text);
 }
 
-.role-btn.student:hover span {
+.role-btn.student:hover .role-desc {
   color: white;
 }
 
@@ -479,7 +482,7 @@ body {
     padding: 15px;
   }
 
-  .role-btn span {
+  .role-desc {
     font-size: 0.7rem;
   }
 

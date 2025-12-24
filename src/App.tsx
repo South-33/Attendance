@@ -98,12 +98,14 @@ function App() {
           <p>Select your role</p>
           <div className="role-buttons">
             <button className="role-btn teacher" onClick={() => handleSelectRole('teacher')}>
-              <Radio className="role-icon" size={24} /> Teacher
-              <span>Start a class session</span>
+              <Radio className="role-icon" size={24} />
+              <span className="role-label">Teacher</span>
+              <span className="role-desc">Start a class session</span>
             </button>
             <button className="role-btn student" onClick={() => handleSelectRole('student')}>
-              <Mic className="role-icon" size={24} /> Student
-              <span>Join a class</span>
+              <Mic className="role-icon" size={24} />
+              <span className="role-label">Student</span>
+              <span className="role-desc">Join a class</span>
             </button>
           </div>
           <button className="change-name" onClick={() => setView('register')}>
