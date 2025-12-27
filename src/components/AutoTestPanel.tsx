@@ -28,6 +28,14 @@ const VOLUME_PRESETS = [
     { label: '0% (Control)', value: 0 },
 ];
 
+// Filter cutoff presets for testing (in kHz)
+const CUTOFF_PRESETS = [
+    { label: '12kHz', value: 12000 },
+    { label: '14kHz', value: 14000 },
+    { label: '15kHz', value: 15000 },
+    { label: '16kHz', value: 16000 },
+];
+
 // Single test result
 interface TestResult {
     configLabel: string;
@@ -85,11 +93,13 @@ export function AutoTestPanel({
     const [selectedVolumes, setSelectedVolumes] = useState<number[]>([0.75]);
     const [testsPerConfig, setTestsPerConfig] = useState(10);
     const [isLocalMode, setIsLocalMode] = useState(false);
-    const [useOutputFilter, setUseOutputFilter] = useState(true); // Dual 17kHz highpass filter
+    const [useOutputFilter, setUseOutputFilter] = useState(true); // Highpass filter
+    const [selectedCutoffs, setSelectedCutoffs] = useState<number[]>([15000]); // Selected cutoff presets
 
     // Test execution state
     const [isRunning, setIsRunning] = useState(false);
-    const [currentConfigIndex, setCurrentConfigIndex] = useState(0);
+    const [currentVolumeIndex, setCurrentVolumeIndex] = useState(0);
+    const [currentCutoffIndex, setCurrentCutoffIndex] = useState(0);
     const [currentTestNumber, setCurrentTestNumber] = useState(0);
     const [progressText, setProgressText] = useState('');
 
@@ -115,6 +125,15 @@ export function AutoTestPanel({
             prev.includes(volume)
                 ? prev.filter(v => v !== volume)
                 : [...prev, volume].sort((a, b) => b - a)
+        );
+    };
+
+    // Handle cutoff checkbox toggle
+    const toggleCutoff = (cutoff: number) => {
+        setSelectedCutoffs(prev =>
+            prev.includes(cutoff)
+                ? prev.filter(c => c !== cutoff)
+                : [...prev, cutoff].sort((a, b) => a - b)
         );
     };
 
@@ -188,14 +207,22 @@ export function AutoTestPanel({
             // More tests for this config
             setCurrentTestNumber(prev => prev + 1);
         } else {
-            // Move to next config
-            const nextIndex = currentConfigIndex + 1;
-            if (nextIndex < selectedVolumes.length) {
-                setCurrentConfigIndex(nextIndex);
+            // Move to next cutoff, then next volume
+            const nextCutoff = currentCutoffIndex + 1;
+            if (nextCutoff < (useOutputFilter ? selectedCutoffs.length : 1)) {
+                setCurrentCutoffIndex(nextCutoff);
                 setCurrentTestNumber(1);
             } else {
-                // All done!
-                finishTesting();
+                // Move to next volume
+                const nextVolume = currentVolumeIndex + 1;
+                if (nextVolume < selectedVolumes.length) {
+                    setCurrentVolumeIndex(nextVolume);
+                    setCurrentCutoffIndex(0);
+                    setCurrentTestNumber(1);
+                } else {
+                    // All done!
+                    finishTesting();
+                }
             }
         }
     };
@@ -253,7 +280,7 @@ export function AutoTestPanel({
             log.info(`[AutoTest] Test ${currentTestNumber}/${testsPerConfig} @ ${label}: ${result.passed ? 'PASSED' : 'FAILED'} (${result.matchScore}/${AUDIO_CONFIG.NUM_PULSES})`);
             recordResult(result);
         }
-    }, [myRequest, currentTestNumber, testsPerConfig, currentConfigIndex, selectedVolumes.length]);
+    }, [myRequest, currentTestNumber, testsPerConfig, currentVolumeIndex, currentCutoffIndex, selectedVolumes.length, selectedCutoffs.length]);
 
     // Run next test when test number or config changes
     useEffect(() => {
@@ -265,7 +292,7 @@ export function AutoTestPanel({
         if (retryCountRef.current === 0) {
             runSingleTest();
         }
-    }, [currentTestNumber, currentConfigIndex]);
+    }, [currentTestNumber, currentVolumeIndex, currentCutoffIndex]);
 
     // Cleanup timeout on unmount
     useEffect(() => {
@@ -278,23 +305,25 @@ export function AutoTestPanel({
     const runSingleTest = async () => {
         if (!isRunningRef.current) return;
 
-        const volume = selectedVolumes[currentConfigIndex];
-        const baseLabel = VOLUME_PRESETS.find(p => p.value === volume)?.label || `${volume * 100}%`;
-        const label = useOutputFilter ? baseLabel : `${baseLabel} (No Filter)`;
+        const volume = selectedVolumes[currentVolumeIndex];
+        const cutoff = useOutputFilter ? selectedCutoffs[currentCutoffIndex] : 15000;
+        const volumeLabel = VOLUME_PRESETS.find(p => p.value === volume)?.label || `${volume * 100}%`;
+        const cutoffLabel = useOutputFilter ? ` @ ${cutoff / 1000}kHz` : ' (No Filter)';
+        const label = volumeLabel + cutoffLabel;
 
         setProgressText(`Running test ${currentTestNumber}/${testsPerConfig} @ ${label}...${retryCountRef.current > 0 ? ` (Retry ${retryCountRef.current})` : ''}${isLocalMode ? ' [LOCAL]' : ''}`);
 
         if (isLocalMode) {
             // LOCAL MODE: Use device's own speaker and mic
-            await runLocalTest(volume, label);
+            await runLocalTest(volume, cutoff, label);
         } else {
             // REMOTE MODE: Use Firebase queue
-            await runRemoteTest(volume, label);
+            await runRemoteTest(volume, cutoff, label);
         }
     };
 
     // Run test in local mode (speaker -> mic on same device)
-    const runLocalTest = async (volume: number, label: string) => {
+    const runLocalTest = async (volume: number, cutoff: number, label: string) => {
         if (!localEmitterRef.current || !localListenerRef.current) {
             handleSystemError(label, volume, 'Local audio not initialized');
             return;
@@ -308,7 +337,7 @@ export function AutoTestPanel({
 
             // Generate and emit pattern
             const pattern = generatePattern();
-            const config: EmitterConfig = { ...baseConfig, volume, useOutputFilter };
+            const config: EmitterConfig = { ...baseConfig, volume, useOutputFilter, filterCutoff: cutoff };
             await localEmitterRef.current.emit(pattern, config);
 
             // Wait for audio to settle
@@ -350,12 +379,13 @@ export function AutoTestPanel({
     };
 
     // Run test in remote mode (via Firebase)
-    const runRemoteTest = async (volume: number, label: string) => {
+    const runRemoteTest = async (volume: number, cutoff: number, label: string) => {
         // Update config with this volume and filter setting
         onConfigChange({
             ...baseConfig,
             volume,
-            useOutputFilter
+            useOutputFilter,
+            filterCutoff: cutoff
         });
 
         // Small delay to ensure config is applied
@@ -384,8 +414,8 @@ export function AutoTestPanel({
 
     // Start testing
     const startTesting = async () => {
-        if (selectedVolumes.length === 0) {
-            alert('Please select at least one volume level to test.');
+        if (useOutputFilter && selectedCutoffs.length === 0) {
+            alert('Please select at least one filter cutoff to test.');
             return;
         }
         if (!isLocalMode && !hasSelectedSession) {
@@ -393,7 +423,9 @@ export function AutoTestPanel({
             return;
         }
 
-        log.info(`[AutoTest] Starting ${testsPerConfig * selectedVolumes.length} tests across ${selectedVolumes.length} configs${isLocalMode ? ' (LOCAL MODE)' : ''}`);
+        const actualCutoffs = useOutputFilter ? selectedCutoffs.length : 1;
+        const totalConfigs = selectedVolumes.length * actualCutoffs;
+        log.info(`[AutoTest] Starting ${testsPerConfig * totalConfigs} tests across ${totalConfigs} configurations${isLocalMode ? ' (LOCAL MODE)' : ''}`);
 
         // If local mode, init audio FIRST before starting loop logic
         if (isLocalMode) {
@@ -414,7 +446,8 @@ export function AutoTestPanel({
         setResults([]);
         setSummary(null);
         setShowResults(false);
-        setCurrentConfigIndex(0);
+        setCurrentVolumeIndex(0);
+        setCurrentCutoffIndex(0);
         setCurrentTestNumber(1); // This triggers the useEffect
         pendingResultRef.current = null;
         retryCountRef.current = 0;
@@ -535,69 +568,96 @@ export function AutoTestPanel({
             <div className="config-section">
                 <div className="volume-selection">
                     <label>Volume Levels to Test:</label>
-                    <div className="checkbox-group">
+                    <div className="chip-group">
                         {VOLUME_PRESETS.map(preset => (
-                            <label key={preset.value} className="volume-checkbox">
+                            <label key={preset.value} className="chip-toggle">
                                 <input
                                     type="checkbox"
                                     checked={selectedVolumes.includes(preset.value)}
                                     onChange={() => toggleVolume(preset.value)}
                                     disabled={isRunning}
                                 />
-                                <span className={preset.value === 0 ? 'muted' : ''}>
-                                    {preset.label}
-                                </span>
+                                <span>{preset.label}</span>
                             </label>
                         ))}
                     </div>
                 </div>
 
-                {/* Local Mode Toggle */}
-                <div className="local-mode-toggle">
-                    <label className="local-checkbox">
-                        <input
-                            type="checkbox"
-                            checked={isLocalMode}
-                            onChange={(e) => {
-                                setIsLocalMode(e.target.checked);
-                                if (e.target.checked) {
-                                    onDeselectSession();
-                                }
-                            }}
-                            disabled={isRunning}
-                        />
-                        <span><Volume2 className="inline-icon" size={14} /> Local Test Mode</span>
-                        <small>(Use device's own speaker & mic, no teacher needed)</small>
-                    </label>
+                {/* Output Signal Filter - Moved up closer to Volume */}
+                <div className="config-item full-width">
+                    <label>Frequency Filter Cutoffs:</label>
+                    <div className="filter-controls">
+                        <div className="chip-group">
+                            <label className="chip-toggle">
+                                <input
+                                    type="checkbox"
+                                    checked={useOutputFilter}
+                                    onChange={(e) => setUseOutputFilter(e.target.checked)}
+                                    disabled={isRunning}
+                                />
+                                <span><VolumeX className="inline-icon" size={14} /> Output Filter</span>
+                            </label>
+
+                            {useOutputFilter && CUTOFF_PRESETS.map(preset => (
+                                <label key={preset.value} className="chip-toggle">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedCutoffs.includes(preset.value)}
+                                        onChange={() => toggleCutoff(preset.value)}
+                                        disabled={isRunning}
+                                    />
+                                    <span>{preset.label}</span>
+                                </label>
+                            ))}
+                        </div>
+                        <small className="filter-help">Reduces mechanical 'pops'. Select multiple to A/B test cutoffs.</small>
+                    </div>
                 </div>
 
-                {/* Output Filter Toggle */}
-                <div className="local-mode-toggle">
-                    <label className="local-checkbox">
-                        <input
-                            type="checkbox"
-                            checked={useOutputFilter}
-                            onChange={(e) => setUseOutputFilter(e.target.checked)}
-                            disabled={isRunning}
-                        />
-                        <span><VolumeX className="inline-icon" size={14} /> Output Filter (17kHz)</span>
-                        <small>(Dual highpass filter reduces audible pops, disable to A/B test)</small>
-                    </label>
-                </div>
+                <div className="settings-row">
+                    {/* Local Mode Toggle */}
+                    <div className="config-item">
+                        <label>Local Test Mode:</label>
+                        <div className="chip-group">
+                            <label className="chip-toggle">
+                                <input
+                                    type="checkbox"
+                                    checked={isLocalMode}
+                                    onChange={(e) => {
+                                        setIsLocalMode(e.target.checked);
+                                        if (e.target.checked) onDeselectSession();
+                                    }}
+                                    disabled={isRunning}
+                                />
+                                <span>
+                                    <Volume2 className="inline-icon" size={14} />
+                                    Local Mode
+                                </span>
+                            </label>
+                        </div>
+                        <small className="filter-help">
+                            {isLocalMode ? 'Internal (Loopback)' : 'Standard (Firebase)'}
+                        </small>
+                    </div>
 
-                <div className="tests-per-config">
-                    <label>Tests per Config:</label>
-                    <input
-                        type="number"
-                        value={testsPerConfig}
-                        onChange={(e) => setTestsPerConfig(Math.max(1, parseInt(e.target.value) || 1))}
-                        min={1}
-                        max={50}
-                        disabled={isRunning}
-                    />
-                    <span className="test-count-info">
-                        Total: {testsPerConfig * selectedVolumes.length} tests
-                    </span>
+                    {/* Tests per config */}
+                    <div className="config-item">
+                        <label>Batch Size:</label>
+                        <div className="tests-per-config">
+                            <input
+                                type="number"
+                                value={testsPerConfig}
+                                onChange={(e) => setTestsPerConfig(Math.max(1, parseInt(e.target.value) || 1))}
+                                min={1}
+                                max={50}
+                                disabled={isRunning}
+                            />
+                            <span className="test-count-info">
+                                Total: <strong>{testsPerConfig * selectedVolumes.length * (useOutputFilter ? selectedCutoffs.length : 1)}</strong>
+                            </span>
+                        </div>
+                        <small className="filter-help">Pulses per configuration</small>
+                    </div>
                 </div>
             </div>
 
@@ -607,7 +667,7 @@ export function AutoTestPanel({
                     <button
                         className="start-btn"
                         onClick={startTesting}
-                        disabled={selectedVolumes.length === 0}
+                        disabled={selectedVolumes.length === 0 || (useOutputFilter && selectedCutoffs.length === 0)}
                     >
                         Start Auto-Test
                     </button>
@@ -634,14 +694,15 @@ export function AutoTestPanel({
                         <div
                             className="progress-fill"
                             style={{
-                                width: `${((currentConfigIndex * testsPerConfig + currentTestNumber) /
-                                    (selectedVolumes.length * testsPerConfig)) * 100}%`
+                                width: `${(((currentVolumeIndex * (useOutputFilter ? selectedCutoffs.length : 1) + currentCutoffIndex) * testsPerConfig + currentTestNumber) /
+                                    (selectedVolumes.length * (useOutputFilter ? selectedCutoffs.length : 1) * testsPerConfig)) * 100}%`
                             }}
                         />
                     </div>
                     <div className="progress-text">{progressText}</div>
                     <div className="progress-stats">
-                        Config {currentConfigIndex + 1}/{selectedVolumes.length} •
+                        Volume {currentVolumeIndex + 1}/{selectedVolumes.length} •
+                        {useOutputFilter && ` Cutoff ${currentCutoffIndex + 1}/${selectedCutoffs.length} •`}
                         Test {currentTestNumber}/{testsPerConfig} •
                         Completed: {results.length}
                     </div>

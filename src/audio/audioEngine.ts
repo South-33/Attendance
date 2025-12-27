@@ -5,10 +5,10 @@ import { log } from '../utils/logger';
 
 // ============== CONFIGURATION ==============
 export const AUDIO_CONFIG = {
-    FREQ_LOW: 18500,           // 18.5 kHz
-    FREQ_HIGH: 20000,          // 20.0 kHz
-    FREQ_THRESHOLD: 19250,     // Classification boundary
-    FREQ_TOLERANCE: 120,       // Detection tolerance
+    FREQ_LOW: 17500,           // 17.5 kHz
+    FREQ_HIGH: 19000,          // 19.0 kHz
+    FREQ_THRESHOLD: 18250,     // Classification boundary
+    FREQ_TOLERANCE: 100,       // ±100Hz tolerance for valid detection (tightened for security)
     PULSE_DURATION_MS: 80,     // Default pulse duration
     PULSE_GAP_MS: 50,          // Gap between pulses
     NUM_PULSES: 6,
@@ -16,16 +16,16 @@ export const AUDIO_CONFIG = {
 
     // Listener config
     MIC_GAIN: 60,              // 60x amplification (increased from 30x)
-    BANDPASS_LOW: 18000,       // Hz
-    BANDPASS_HIGH: 21000,      // Hz
+    BANDPASS_LOW: 17000,       // Hz
+    BANDPASS_HIGH: 20000,      // Hz
     FFT_SIZE: 8192,            // Higher = better freq resolution
     SNR_THRESHOLD: 2,          // Signal must be 2x noise floor (very lenient)
     PEAK_MERGE_FREQ_HZ: 400,   // Merge peaks within 400Hz
     PEAK_MERGE_TIME_MS: 50,    // Merge peaks within 50ms (less than gap to avoid merging consecutive pulses)
 
     // Fade envelope (prevents pops)
-    FADE_IN_MS: 2,
-    FADE_OUT_MS: 8,
+    FADE_IN_MS: 20,   // Long fade to prevent pops
+    FADE_OUT_MS: 25,  // Long fade to prevent pops
 };
 
 export type PulseType = 'H' | 'L' | '?';  // '?' = missing/unknown
@@ -36,7 +36,8 @@ export interface EmitterConfig {
     freqHigh: number;
     pulseDuration: number;    // ms
     pulseGap: number;         // ms
-    useOutputFilter?: boolean; // If true, use dual 17kHz highpass filter (reduces pops). Default: true
+    useOutputFilter?: boolean; // If true, use highpass filter (reduces pops). Default: true
+    filterCutoff?: number;     // Highpass filter cutoff in Hz. Default: 15000
 }
 
 export interface DetectedPeak {
@@ -55,17 +56,18 @@ export class UltrasonicEmitter {
 
     async init(): Promise<void> {
         if (!this.audioContext) {
-            this.audioContext = new AudioContext();
-            log.info('[Emitter] AudioContext created');
+            // Try 44.1kHz - this engages Chrome's rolloff filter more aggressively
+            this.audioContext = new AudioContext({ sampleRate: 44100 });
+            log.info(`[Emitter] AudioContext @ ${this.audioContext.sampleRate}Hz`);
 
-            // Create cascaded highpass filters for STEEP rolloff (48dB/octave = brick wall)
-            // 4 filters in series = extremely sharp cutoff
-            // 17.5kHz cutoff = 1kHz headroom below our 18.5kHz signal
-            const FILTER_CUTOFF = 17500; // 17.5kHz
-            const FILTER_Q = 0.707; // Butterworth (no resonance)
+            // Single-stage highpass filter - cutoff updated dynamically in emit()
+            // Default: 15kHz cutoff to block audible content while preserving ultrasonic
+            const FILTER_CUTOFF = 15000;
+            const FILTER_Q = 0.707; // Butterworth (flat passband)
+
 
             const filters: BiquadFilterNode[] = [];
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 1; i++) {  // Single stage - minimizes beeps
                 const filter = this.audioContext.createBiquadFilter();
                 filter.type = 'highpass';
                 filter.frequency.value = FILTER_CUTOFF;
@@ -73,13 +75,13 @@ export class UltrasonicEmitter {
                 filters.push(filter);
             }
 
-            // Chain: oscillator → gain → filter1 → filter2 → filter3 → filter4 → destination
+            // Chain: oscillator → gain → filter → destination
             this.outputFilter = filters[0];
             for (let i = 0; i < filters.length - 1; i++) {
                 filters[i].connect(filters[i + 1]);
             }
             filters[filters.length - 1].connect(this.audioContext.destination);
-            log.info('[Emitter] Quad highpass filters (16.5kHz, 48dB/oct) enabled');
+            log.info(`[Emitter] Highpass filter @ ${FILTER_CUTOFF}Hz enabled`);
         }
         if (this.audioContext.state === 'suspended') {
             await this.audioContext.resume();
@@ -107,6 +109,8 @@ export class UltrasonicEmitter {
         const emittedFreqs: number[] = [];
 
         const useFilter = config.useOutputFilter !== false; // Default to true
+        const cutoff = config.filterCutoff ?? 15000;
+        if (this.outputFilter) this.outputFilter.frequency.value = cutoff;
         log.info(`[Emitter] Emitting ${pattern.length} pulses: ${pattern.join('')}`);
         log.debug(`[Emitter] Config: vol=${config.volume}, dur=${config.pulseDuration}ms, gap=${config.pulseGap}ms, filter=${useFilter}`);
 
@@ -151,21 +155,19 @@ export class UltrasonicEmitter {
         oscillator.type = 'sine';
         oscillator.frequency.setValueAtTime(freq, startTime);
 
-        // Envelope: silence → fade in → hold → fade out → silence
-        gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(volume, fadeInEnd);
+        // Envelope: exponential fade in/out (smoother than linear, fewer transients)
+        gainNode.gain.setValueAtTime(0.001, startTime); // Start near-zero (can't be exactly 0 for exponential)
+        gainNode.gain.exponentialRampToValueAtTime(volume, fadeInEnd);
         gainNode.gain.setValueAtTime(volume, fadeOutStart);
-        gainNode.gain.linearRampToValueAtTime(0, endTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, endTime); // End near-zero
 
         oscillator.connect(gainNode);
 
         // Route through filter (reduces pops) or directly to destination (for A/B testing)
         if (useFilter && this.outputFilter) {
             gainNode.connect(this.outputFilter);
-            log.debug(`[Emitter] Pulse ${freq}Hz routed through highpass filter`);
         } else {
             gainNode.connect(ctx.destination);
-            log.debug(`[Emitter] Pulse ${freq}Hz going DIRECT (no filter!) - useFilter=${useFilter}, hasFilter=${!!this.outputFilter}`);
         }
 
         oscillator.start(startTime);

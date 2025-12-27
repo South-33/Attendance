@@ -286,6 +286,10 @@
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     transition: all 0.1s;
     font-family: var(--font-mono);
     text-transform: uppercase;

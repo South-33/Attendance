@@ -28,22 +28,47 @@
   color: white;
 }
 
-.header-left {
+.log-header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
+  flex: 1;
+}
+
+.log-header-left h3 {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: white;
+}
+
+.log-header-left svg {
+  opacity: 0.8;
+  transition: transform 0.2s;
+}
+
+.log-panel.collapsed .log-header-left svg {
+  transform: rotate(-90deg);
+}
+
+.log-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 .log-btn {
-  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border-radius: 0;
   border: 1px solid #fff;
   cursor: pointer;
-  font-size: 10px;
-  font-weight: 700;
   transition: all 0.1s;
-  text-transform: uppercase;
 }
 
 .log-btn.copy {
@@ -150,7 +175,12 @@
   }
 
   .log-btn {
-    padding: 2px 6px;
-    font-size: 9px;
+    width: 24px;
+    height: 24px;
+    border-width: 1px;
+  }
+
+  .log-actions {
+    gap: 4px;
   }
 }

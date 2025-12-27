@@ -1,13 +1,15 @@
 /* FAT FIREWORK - Auto-Test Panel */
 
 .autotest-panel {
-    background: #f0f0f0;
-    border-radius: 0;
-    padding: 24px;
+    background: #e8e8e8;
+    /* Slightly darker grey background for the container */
     border: 2px solid var(--ff-text);
+    padding: 24px;
     margin-top: 24px;
-    box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .autotest-panel.collapsed {
@@ -70,141 +72,132 @@
 }
 
 .volume-selection label,
-.tests-per-config label {
+.config-item label {
     display: block;
-    font-size: 0.75rem;
-    color: #666;
+    font-size: 0.65rem;
+    color: #888;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-    font-weight: 700;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+    font-weight: 900;
 }
 
-.checkbox-group {
+/* Unified Chip Style */
+.chip-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
 }
 
-/* Chip-style Volume Toggles */
-.volume-checkbox {
+.chip-toggle {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 20px;
+    padding: 10px 16px;
     background: white;
     border: 1px solid var(--ff-text);
-    border-radius: 0;
     cursor: pointer;
     transition: all 0.1s;
-    transition: all 0.1s;
-    min-width: 70px;
-    flex: 1 1 auto;
     user-select: none;
     text-align: center;
-    overflow: hidden;
+    min-width: 60px;
+    flex: 1 1 auto;
 }
 
-.volume-checkbox:hover {
-    background: #e0e0e0;
-    transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0 var(--ff-grid);
+.chip-toggle:hover {
+    background: #f0f0f0;
+    transform: translateY(-1px);
 }
 
-/* Checkbox hidden but functional */
-.volume-checkbox input[type="checkbox"] {
+.chip-toggle input[type="checkbox"] {
     position: absolute;
     opacity: 0;
-    cursor: pointer;
-    height: 0;
     width: 0;
+    height: 0;
 }
 
-/* Active State */
-.volume-checkbox:has(input:checked) {
-    background: var(--ff-text);
-    /* Black active */
-    border-color: var(--ff-text);
-    box-shadow: 4px 4px 0 var(--ff-red);
-    transform: translate(-2px, -2px);
+.chip-toggle:has(input:checked) {
+    background: #111;
+    border-color: #111;
+    box-shadow: inset 0 -4px 0 var(--ff-red);
+    /* Stronger indicator */
 }
 
-.volume-checkbox span {
+.chip-toggle span {
     color: var(--ff-text);
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: color 0.1s;
-    font-family: var(--font-mono);
-    white-space: nowrap;
-}
-
-.volume-checkbox:has(input:checked) span {
-    color: white;
     font-weight: 700;
-}
-
-.volume-checkbox span.muted {
     font-size: 0.75rem;
-    white-space: normal;
-    line-height: 1.1;
-}
-
-/* Local Mode Toggle */
-.local-mode-toggle {
-    margin: 12px 0;
-    padding: 16px;
-    background: white;
-    border: 1px solid var(--ff-text);
-    border-radius: 0;
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.05);
-}
-
-.local-checkbox {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 16px;
-    cursor: pointer;
-    user-select: none;
-}
-
-.local-checkbox input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--ff-red);
-    cursor: pointer;
-    border-radius: 0;
-    grid-row: span 2;
-}
-
-.local-checkbox span {
-    font-weight: 700;
-    color: var(--ff-text);
+    font-family: var(--font-mono);
     text-transform: uppercase;
+    letter-spacing: 0.5px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    font-size: 0.9rem;
-    line-height: 1.2;
 }
 
-.local-checkbox small {
-    color: #666;
-    font-size: 0.75rem;
+.inline-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.chip-toggle:has(input:checked) span {
+    color: white;
+}
+
+.chip-toggle small {
+    display: block;
+    font-size: 0.65rem;
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+/* Settings Grid */
+.settings-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.config-item {
+    background: white;
+    border: 1px solid var(--ff-text);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.config-item.full-width {
+    grid-column: span 2;
+}
+
+.config-item label {
+    margin: 0;
+}
+
+.filter-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-help {
+    color: #888;
+    font-size: 0.65rem;
     font-family: var(--font-mono);
-    opacity: 0.8;
 }
 
 .tests-per-config {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 16px;
-    background: white;
-    padding: 12px 16px;
-    border-radius: 0;
-    border: 1px solid var(--ff-text);
-    width: fit-content;
+    gap: 12px;
+    background: transparent;
+    padding: 0;
+    border: none;
 }
 
 .tests-per-config label {
@@ -233,9 +226,10 @@
 
 .test-count-info {
     color: #666;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     padding-left: 12px;
-    border-left: 2px solid var(--ff-text);
+    border-left: 2px solid #ddd;
+    font-family: var(--font-mono);
 }
 
 /* Test Controls */
@@ -249,23 +243,23 @@
 .stop-btn,
 .results-btn {
     flex: 1;
-    padding: 16px 24px;
+    padding: 14px 24px;
     border: 2px solid var(--ff-text);
     border-radius: 0;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
-    transition: all 0.1s;
+    transition: all 0.15s;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     font-family: var(--font-display);
     background: white;
     color: var(--ff-text);
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 4px 4px 0 var(--ff-text);
 }
 
 .start-btn:hover:not(:disabled) {
@@ -655,24 +649,17 @@
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .volume-checkbox {
-        flex: 1 1 calc(33% - 12px);
-        min-width: 60px;
-        padding: 10px 8px;
+    .settings-row {
+        grid-template-columns: 1fr;
     }
 
-    .volume-checkbox span {
-        font-size: 0.8rem;
+    .config-item.full-width {
+        grid-column: span 1;
     }
 
-    .local-checkbox {
-        gap: 12px;
-    }
-}
-
-@media (max-width: 400px) {
-    .volume-checkbox {
-        flex: 1 1 calc(50% - 12px);
+    .chip-toggle {
+        flex: 1 1 calc(50% - 8px);
+        min-width: calc(50% - 8px);
     }
 
     .autotest-panel {

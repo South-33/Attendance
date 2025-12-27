@@ -149,7 +149,7 @@ export function TeacherView({ teacherId, teacherName, onBack }: TeacherViewProps
 
     // Helper: Create a hash of EmitterConfig for grouping
     const getConfigKey = (config: EmitterConfig): string => {
-        return `${config.volume}_${config.freqLow}_${config.freqHigh}_${config.pulseDuration}_${config.pulseGap}`;
+        return `${config.volume}_${config.freqLow}_${config.freqHigh}_${config.pulseDuration}_${config.pulseGap}_${config.useOutputFilter}_${config.filterCutoff}`;
     };
 
     // Process queue automatically when ready students are available

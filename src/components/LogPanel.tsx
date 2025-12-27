@@ -61,9 +61,9 @@ export function LogPanel({ maxHeight = '300px' }: LogPanelProps) {
     return (
         <div className={`log-panel ${isExpanded ? 'expanded' : 'collapsed'}`}>
             <header className="log-header" onClick={() => setIsExpanded(!isExpanded)}>
-                <div className="header-left">
-                    {isExpanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                <div className="log-header-left">
                     <h3>Console Logs</h3>
+                    <ChevronDown size={14} className="inline-icon" />
                 </div>
                 <div className="log-actions" onClick={e => e.stopPropagation()}>
                     <button onClick={handleCopy} title="Copy logs" className={`log-btn copy ${copied ? 'copied' : ''}`}>

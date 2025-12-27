@@ -38,11 +38,12 @@ interface StudentViewProps {
 }
 
 const DEFAULT_CONFIG: EmitterConfig = {
-    volume: 0.8,  // Lower to prevent speaker clipping (causes audible harmonics)
+    volume: 0.8,  // User preferred
     freqLow: AUDIO_CONFIG.FREQ_LOW,
     freqHigh: AUDIO_CONFIG.FREQ_HIGH,
     pulseDuration: AUDIO_CONFIG.PULSE_DURATION_MS,
-    pulseGap: AUDIO_CONFIG.PULSE_GAP_MS
+    pulseGap: AUDIO_CONFIG.PULSE_GAP_MS,
+    // useOutputFilter defaults to true (12kHz cutoff now)
 };
 
 export function StudentView({ studentId, studentName, onBack }: StudentViewProps) {
