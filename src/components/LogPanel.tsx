@@ -1,7 +1,7 @@
 // LogPanel Component - Displays logs in UI with copy button
 
 import { useState, useEffect, useRef } from 'react';
-import { Clipboard, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clipboard, Trash2, ChevronDown } from 'lucide-react';
 import { log } from '../utils/logger';
 import type { LogEntry, LogLevel } from '../utils/logger';
 import './LogPanel.css';
