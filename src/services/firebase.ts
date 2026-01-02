@@ -56,14 +56,14 @@ export interface QueueEntry {
     studentId: string;
     studentName: string;
     status: QueueStatus;
-    batchId?: string;
+    batchId?: string | null;
     config: EmitterConfig;
-    emittedPattern?: PulseType[];
-    detectedPattern?: PulseType[];
-    matchCount?: number;
-    passed?: boolean;
+    emittedPattern?: PulseType[] | null;
+    detectedPattern?: PulseType[] | null;
+    matchCount?: number | null;
+    passed?: boolean | null;
     createdAt: Timestamp;
-    verifiedAt?: Timestamp;
+    verifiedAt?: Timestamp | null;
     diagnosticData?: {
         peaks: {
             type: string;
@@ -72,7 +72,7 @@ export interface QueueEntry {
             snr: number;
         }[];
         noiseFloor: number;
-    };
+    } | null;
 }
 
 // ============== SESSION FUNCTIONS ==============

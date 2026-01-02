@@ -94,7 +94,7 @@ export function AutoTestPanel({
     const [testsPerConfig, setTestsPerConfig] = useState(10);
     const [isLocalMode, setIsLocalMode] = useState(false);
     const [useOutputFilter, setUseOutputFilter] = useState(true); // Highpass filter
-    const [selectedCutoffs, setSelectedCutoffs] = useState<number[]>([15000]); // Selected cutoff presets
+    const [selectedCutoffs, setSelectedCutoffs] = useState<number[]>([16000]); // 16kHz optimal default
 
     // Test execution state
     const [isRunning, setIsRunning] = useState(false);

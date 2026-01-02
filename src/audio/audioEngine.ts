@@ -8,24 +8,24 @@ export const AUDIO_CONFIG = {
     FREQ_LOW: 17500,           // 17.5 kHz
     FREQ_HIGH: 19000,          // 19.0 kHz
     FREQ_THRESHOLD: 18250,     // Classification boundary
-    FREQ_TOLERANCE: 100,       // ±100Hz tolerance for valid detection (tightened for security)
-    PULSE_DURATION_MS: 80,     // Default pulse duration
-    PULSE_GAP_MS: 50,          // Gap between pulses
+    FREQ_TOLERANCE: 250,       // ±250Hz: Accommodate Doppler & clock drift
+    PULSE_DURATION_MS: 100,    // Increased: Stronger signal integration
+    PULSE_GAP_MS: 80,          // Increased: Better echo rejection (prevents pulse merging)
     NUM_PULSES: 6,
-    MAX_PEAKS: 10,             // Max peaks to submit (prevents cheater flooding)
+    MAX_PEAKS: 20,             // Increased from 10: Prevents dropping valid pulses if echoes are strong
 
     // Listener config
-    MIC_GAIN: 60,              // 60x amplification (increased from 30x)
-    BANDPASS_LOW: 17000,       // Hz
-    BANDPASS_HIGH: 20000,      // Hz
-    FFT_SIZE: 8192,            // Higher = better freq resolution
-    SNR_THRESHOLD: 2,          // Signal must be 2x noise floor (very lenient)
-    PEAK_MERGE_FREQ_HZ: 400,   // Merge peaks within 400Hz
-    PEAK_MERGE_TIME_MS: 50,    // Merge peaks within 50ms (less than gap to avoid merging consecutive pulses)
+    MIC_GAIN: 100,             // 100x amplification
+    BANDPASS_LOW: 16500,       // Widen capture band
+    BANDPASS_HIGH: 21000,      // Widen capture band
+    FFT_SIZE: 8192,
+    SNR_THRESHOLD: 1.5,        // More sensitive (1.5x noise floor)
+    PEAK_MERGE_FREQ_HZ: 400,
+    PEAK_MERGE_TIME_MS: 80,    // Increased from 50ms: Merge echoes better (matches pulse gap)
 
-    // Fade envelope (prevents pops)
-    FADE_IN_MS: 20,   // Long fade to prevent pops
-    FADE_OUT_MS: 25,  // Long fade to prevent pops
+    // Fade envelope
+    FADE_IN_MS: 10,   // Faster attack (Linear)
+    FADE_OUT_MS: 20,  // Clean release
 };
 
 export type PulseType = 'H' | 'L' | '?';  // '?' = missing/unknown
@@ -116,11 +116,26 @@ export class UltrasonicEmitter {
 
         // Schedule all pulses upfront using AudioContext.currentTime (hardware clock)
         // This is immune to browser tab throttling
-        let scheduleTime = ctx.currentTime + 0.01; // 10ms buffer
+        const baseTime = ctx.currentTime + 0.01; // 10ms buffer
+        let scheduleTime = baseTime;
+
+        // --- WARMUP PULSE (Fixes AGC Lag) ---
+        // Emit a 40ms pulse at L frequency (17500Hz) to trigger AGC
+        // Uses L freq to avoid boundary drift at 18250Hz causing random H classifications
+        const WAKE_UP_FREQ = 17500;
+        this.schedulePulse(ctx, WAKE_UP_FREQ, config.volume, 40, scheduleTime, useFilter);
+        scheduleTime += 0.16; // 40ms pulse + 120ms gap (must exceed PEAK_MERGE_TIME_MS of 80ms)
+        // ------------------------------------
+
+        const pulseTimes: string[] = [];
 
         for (let i = 0; i < pattern.length; i++) {
             const freq = pattern[i] === 'H' ? config.freqHigh : config.freqLow;
             emittedFreqs.push(freq);
+
+            // Log relative time for each pulse
+            const relativeMs = Math.round((scheduleTime - baseTime) * 1000);
+            pulseTimes.push(`${pattern[i]}@${relativeMs}ms`);
 
             this.schedulePulse(ctx, freq, config.volume, config.pulseDuration, scheduleTime, useFilter);
 
@@ -131,8 +146,11 @@ export class UltrasonicEmitter {
             }
         }
 
+        log.debug(`[Emitter] Pulse schedule: ${pulseTimes.join(', ')}`);
+
         // Calculate total duration and wait for emission to complete
-        const totalDurationMs = (config.pulseDuration * pattern.length) + (config.pulseGap * (pattern.length - 1));
+        // 160ms added for Warmup Pulse overhead (40ms pulse + 120ms gap)
+        const totalDurationMs = 160 + (config.pulseDuration * pattern.length) + (config.pulseGap * (pattern.length - 1));
         await this.sleep(totalDurationMs + 50); // Small buffer for fade out
 
         log.success(`[Emitter] Emission complete. Freqs: ${emittedFreqs.join(', ')}`);
@@ -155,11 +173,11 @@ export class UltrasonicEmitter {
         oscillator.type = 'sine';
         oscillator.frequency.setValueAtTime(freq, startTime);
 
-        // Envelope: exponential fade in/out (smoother than linear, fewer transients)
-        gainNode.gain.setValueAtTime(0.001, startTime); // Start near-zero (can't be exactly 0 for exponential)
-        gainNode.gain.exponentialRampToValueAtTime(volume, fadeInEnd);
+        // Envelope: Linear fade in/out (Exponential starts too slow, cutting effective duration)
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(volume, fadeInEnd);
         gainNode.gain.setValueAtTime(volume, fadeOutStart);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, endTime); // End near-zero
+        gainNode.gain.linearRampToValueAtTime(0, endTime);
 
         oscillator.connect(gainNode);
 
@@ -423,6 +441,14 @@ export class UltrasonicListener {
 
         // Sort by timestamp (chronological order for subsequence matching)
         finalPeaks.sort((a, b) => a.timestamp - b.timestamp);
+
+        // DIAGNOSTIC: Log time deltas between peaks
+        if (finalPeaks.length > 1) {
+            const deltas = finalPeaks.slice(1).map((p, i) =>
+                Math.round(p.timestamp - finalPeaks[i].timestamp)
+            );
+            log.debug(`[Listener] Peak time deltas (ms): ${deltas.join(', ')}`);
+        }
 
         log.success(`[Listener] Final peaks (${finalPeaks.length}): ${finalPeaks.map(p => p.type).join('')}`);
         return finalPeaks;

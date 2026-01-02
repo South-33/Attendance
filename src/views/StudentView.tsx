@@ -38,12 +38,13 @@ interface StudentViewProps {
 }
 
 const DEFAULT_CONFIG: EmitterConfig = {
-    volume: 0.8,  // User preferred
+    volume: 0.75,  // Optimal: 97.5% pass rate in testing
     freqLow: AUDIO_CONFIG.FREQ_LOW,
     freqHigh: AUDIO_CONFIG.FREQ_HIGH,
     pulseDuration: AUDIO_CONFIG.PULSE_DURATION_MS,
     pulseGap: AUDIO_CONFIG.PULSE_GAP_MS,
-    // useOutputFilter defaults to true (12kHz cutoff now)
+    useOutputFilter: true,   // Enable 16kHz highpass for noise rejection
+    filterCutoff: 16000,     // 16kHz cutoff - proven best in A/B testing
 };
 
 export function StudentView({ studentId, studentName, onBack }: StudentViewProps) {
@@ -273,7 +274,15 @@ export function StudentView({ studentId, studentName, onBack }: StudentViewProps
             setStatus('requesting');
 
             // Update existing entry to ready
-            await updateQueueStatus(queueId, 'ready');
+            // CRITICAL FIX: Clear previous results so we don't accidentally "submit" old peaks
+            await updateQueueStatus(queueId, 'ready', {
+                detectedPattern: null,
+                emittedPattern: null,
+                matchCount: null,
+                passed: null,
+                diagnosticData: null,
+                batchId: null      // Clear batch ID to get a fresh one
+            });
             setStatus('ready');
             log.success('[Request] Status updated to READY');
 
