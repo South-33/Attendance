@@ -274,7 +274,7 @@ export function AutoTestPanel({
                 emittedPattern: myRequest.emittedPattern?.join('') ?? '',
                 detectedPattern: myRequest.detectedPattern?.join('') ?? '',
                 timestamp: Date.now(),
-                diagnostics: myRequest.diagnosticData
+                diagnostics: myRequest.diagnosticData ?? undefined
             };
 
             log.info(`[AutoTest] Test ${currentTestNumber}/${testsPerConfig} @ ${label}: ${result.passed ? 'PASSED' : 'FAILED'} (${result.matchScore}/${AUDIO_CONFIG.NUM_PULSES})`);
