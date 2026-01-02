@@ -153,11 +153,33 @@ export function TeacherView({ teacherId, teacherName, onBack }: TeacherViewProps
     };
 
     // Process queue automatically when ready students are available
+    // Use debounce to collect concurrent requests before processing
+    const processTimeoutRef = useRef<number | null>(null);
+
     useEffect(() => {
         const readyStudents = queue.filter(e => e.status === 'ready');
         if (readyStudents.length > 0 && !isProcessing) {
-            processQueue(readyStudents);
+            // Clear any pending timeout
+            if (processTimeoutRef.current) {
+                clearTimeout(processTimeoutRef.current);
+            }
+            // Wait 200ms to collect more students before processing
+            // This handles the case where 2 students request at nearly the same time
+            processTimeoutRef.current = window.setTimeout(() => {
+                // Get fresh list after waiting (more students may have joined)
+                const currentReady = queueRef.current.filter(e => e.status === 'ready');
+                if (currentReady.length > 0) {
+                    log.info(`[Queue] Collected ${currentReady.length} student(s), starting batch...`);
+                    processQueue(currentReady);
+                }
+            }, 200);
         }
+
+        return () => {
+            if (processTimeoutRef.current) {
+                clearTimeout(processTimeoutRef.current);
+            }
+        };
     }, [queue, isProcessing]);
 
     // Smart queue processing: group by config, process groups sequentially
@@ -221,13 +243,13 @@ export function TeacherView({ teacherId, teacherName, onBack }: TeacherViewProps
             const pattern = generatePattern();
             log.info(`[Batch] Pattern: ${pattern.join('')}`);
 
-            // Mark all as emitting and assign batch
-            for (const student of students) {
-                await updateQueueStatus(student.id, 'emitting', {
+            // Mark ALL students as emitting SIMULTANEOUSLY (prevents timing skew)
+            await Promise.all(students.map(student =>
+                updateQueueStatus(student.id, 'emitting', {
                     batchId,
                     emittedPattern: pattern
-                });
-            }
+                })
+            ));
 
             // HANDSHAKE: Wait for ALL students to signal 'listening' (mic ready)
             // Students update their status to 'listening' after mic init completes
@@ -270,18 +292,18 @@ export function TeacherView({ teacherId, teacherName, onBack }: TeacherViewProps
             // Ensures the last pulse is fully transmitted before asking students to submit
             await new Promise(r => setTimeout(r, 150));
 
-            // Signal students to submit
-            for (const student of students) {
-                await updateQueueStatus(student.id, 'submitted');
-            }
+            // Signal ALL students to submit SIMULTANEOUSLY
+            await Promise.all(students.map(student =>
+                updateQueueStatus(student.id, 'submitted')
+            ));
 
             log.info('[Batch] Waiting for student submissions...');
 
         } catch (e) {
             log.error(`[Batch] Process failed: ${e}`);
-            for (const student of students) {
-                await updateQueueStatus(student.id, 'failed');
-            }
+            await Promise.all(students.map(student =>
+                updateQueueStatus(student.id, 'failed')
+            ));
         }
     };
 
